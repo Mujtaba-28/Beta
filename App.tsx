@@ -25,7 +25,11 @@ import { useHashLocation } from './utils/router';
 import { triggerHaptic } from './utils';
 
 export default function App() {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction, budgets, updateBudget, dataError, isOnboarded, userName, activeContext, setActiveContext } from useFinance();
+  const { 
+    transactions, addTransaction, updateTransaction, deleteTransaction, 
+    budgets, updateBudget, dataError, isOnboarded, userName, 
+    activeContext, setActiveContext 
+  } = useFinance();
   const { isDark, currency } = useTheme();
   
   const [activeTab, navigate] = useHashLocation();
