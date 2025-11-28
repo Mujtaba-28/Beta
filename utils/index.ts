@@ -1,2 +1,2 @@
 
-// This file is deprecated. All utils have been moved to the root utils.ts file.
+// This file is deprecated. All utils are now in the root utils.ts file.

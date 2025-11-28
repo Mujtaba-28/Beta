@@ -9,7 +9,6 @@ export const isBiometricAvailable = async () => {
 export const registerBiometric = async (userName: string) => {
     if (!window.PublicKeyCredential) return false;
 
-    // Random challenge (In a real backend app, this comes from the server)
     const challenge = new Uint8Array(32);
     window.crypto.getRandomValues(challenge);
 
@@ -20,7 +19,7 @@ export const registerBiometric = async (userName: string) => {
         challenge,
         rp: {
             name: "Emerald Finance",
-            id: window.location.hostname // Must match current domain
+            id: window.location.hostname
         },
         user: {
             id: userId,
@@ -29,7 +28,7 @@ export const registerBiometric = async (userName: string) => {
         },
         pubKeyCredParams: [{ alg: -7, type: "public-key" }],
         authenticatorSelection: {
-            authenticatorAttachment: "platform", // FaceID/TouchID
+            authenticatorAttachment: "platform",
             userVerification: "required"
         },
         timeout: 60000,

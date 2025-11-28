@@ -3,13 +3,18 @@
 
 const workerCode = `
 self.onmessage = function(e) {
-    const { transactions, currentDateStr, budgets, viewType, EXPENSE_CATEGORIES, INCOME_CATEGORIES } = e.data;
+    // FIX: Destructure activeContext from worker data.
+    const { transactions, currentDateStr, budgets, viewType, EXPENSE_CATEGORIES, INCOME_CATEGORIES, activeContext } = e.data;
     const currentDate = new Date(currentDateStr);
     
     try {
         const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-        const currentBudgetKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
-        const currentBudget = budgets[currentBudgetKey] || budgets['default'] || 60000;
+        const currentMonthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
+        
+        // FIX: Use activeContext to construct the correct keys for retrieving the current budget.
+        const budgetKey = \`\${activeContext}-\${currentMonthKey}\`;
+        const defaultBudgetKey = \`\${activeContext}-default\`;
+        const currentBudget = budgets[budgetKey] || budgets[defaultBudgetKey] || 0;
 
         // --- MONTHLY DATA CALCULATION ---
         const monthlyTransactions = transactions.filter(t => {
@@ -61,7 +66,7 @@ self.onmessage = function(e) {
         const categoryList = viewType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
         let categoryData = categoryList.map(cat => {
             const amount = activeTransactions.filter(t => t.category === cat.name).reduce((a, b) => a + b.amount, 0);
-            const catBudget = budgets[currentBudgetKey + '-category-' + cat.name] || 0;
+            const catBudget = budgets[currentMonthKey + '-category-' + cat.name] || 0;
             return { 
                 ...cat, 
                 amount, 

@@ -10,10 +10,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // FIX: Replaced `process.cwd()` with `.` to avoid a TypeScript type error.
-      // `path.resolve('.')` correctly resolves to the project's root directory,
-      // which is equivalent to `process.cwd()`.
-      '@': path.resolve('.'),
+      // FIX: Replaced `process.cwd()` with `__dirname` to avoid TypeScript type errors
+      // in environments where Node.js `process` types are not fully available.
+      // `path.resolve(__dirname, '.')` correctly resolves to the project's root directory.
+      '@': path.resolve(__dirname, '.'),
     },
   },
 });

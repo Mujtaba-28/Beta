@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Wallet, Target, ArrowDownLeft, ArrowUpRight, ArrowRight, ShieldAlert, DownloadCloud, X, Zap, Check } from 'lucide-react';
-import { Subscription, Transaction } from '../../types';
+import { Transaction, Subscription } from '../../types';
 import { TransactionItem } from '../TransactionItem';
 import { formatMoney, triggerHaptic, calculateNextDate } from '../../utils';
 import { useFinance } from '../../contexts/FinanceContext';

@@ -26,7 +26,7 @@ import { triggerHaptic } from './utils';
 
 export default function App() {
   const { 
-    addTransaction, updateTransaction, deleteTransaction, 
+    transactions, addTransaction, updateTransaction, deleteTransaction, 
     budgets, updateBudget, dataError, isOnboarded, userName, 
     activeContext, setActiveContext 
   } = useFinance();
@@ -206,7 +206,7 @@ export default function App() {
         {showSubsModal && <SubscriptionsModal onClose={() => setShowSubsModal(false)} />}
         {showGoalsModal && <GoalsModal onClose={() => setShowGoalsModal(false)} />}
         {showDebtsModal && <DebtsModal onClose={() => setShowDebtsModal(false)} />}
-        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} />}
+        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} totalBudget={totalBudget} />}
         {showTutorialModal && <TutorialModal onClose={() => setShowTutorialModal(false)} />}
       </div>
     </div>

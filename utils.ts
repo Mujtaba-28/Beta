@@ -112,7 +112,12 @@ export const shareFile = async (file: File, title: string, text: string) => {
 };
 
 const EXCHANGE_RATES: Record<string, number> = {
-    'INR': 1, 'USD': 84.5, 'EUR': 91.2, 'GBP': 107.8, 'AED': 23.0, 'JPY': 0.56,
+    'INR': 1,
+    'USD': 84.5,
+    'EUR': 91.2,
+    'GBP': 107.8,
+    'AED': 23.0,
+    'JPY': 0.56,
 };
 
 export const getExchangeRate = (from: string, to: string): number => {
@@ -143,8 +148,11 @@ export const calculateDebtPayoff = (debts: Debt[], extraPayment: number, strateg
     let totalInterest = 0;
     
     const sortDebts = (ds: typeof currentDebts) => {
-        if (strategy === 'snowball') ds.sort((a, b) => a.currentBalance - b.currentBalance);
-        else ds.sort((a, b) => b.interestRate - a.interestRate);
+        if (strategy === 'snowball') {
+            ds.sort((a, b) => a.currentBalance - b.currentBalance);
+        } else {
+            ds.sort((a, b) => b.interestRate - a.interestRate);
+        }
     };
 
     while (currentDebts.some(d => d.currentBalance > 0.1) && months < 600) { 
@@ -174,7 +182,13 @@ export const calculateDebtPayoff = (debts: Debt[], extraPayment: number, strateg
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + months);
 
-    return { months, payoffDate, totalInterest, baselineMonths, baselineInterest };
+    return {
+        months,
+        payoffDate,
+        totalInterest,
+        baselineMonths,
+        baselineInterest
+    };
 };
 
 export const convertArrayToCSV = (arr: any[]) => {
@@ -182,15 +196,19 @@ export const convertArrayToCSV = (arr: any[]) => {
   const separator = ',';
   const keys = Object.keys(arr[0]).filter(k => k !== 'icon' && k !== 'splits' && k !== 'attachment'); 
   const csvContent =
-    keys.join(separator) + '\n' +
-    arr.map((row) => keys.map((k) => {
+    keys.join(separator) +
+    '\n' +
+    arr.map((row) => {
+      return keys.map((k) => {
         let cell = row[k] === null || row[k] === undefined ? '' : row[k];
         cell = cell instanceof Date ? cell.toISOString() : cell.toString();
         cell = cell.replace(/"/g, '""');
-        if (cell.search(/("|,|\n)/g) >= 0) cell = `"${cell}"`;
+        if (cell.search(/("|,|\n)/g) >= 0) {
+          cell = `"${cell}"`;
+        }
         return cell;
-      }).join(separator)
-    ).join('\n');
+      }).join(separator);
+    }).join('\n');
   return csvContent;
 };
 
@@ -200,7 +218,7 @@ export const parseCSV = (csvText: string): Partial<Transaction>[] => {
 
   const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
   
-  const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('description'));
+  const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('merchant') || h.includes('description'));
   const amountIdx = headers.findIndex(h => h.includes('amount'));
   const dateIdx = headers.findIndex(h => h.includes('date'));
   const catIdx = headers.findIndex(h => h.includes('category'));
@@ -210,14 +228,17 @@ export const parseCSV = (csvText: string): Partial<Transaction>[] => {
 
   for (let i = 1; i < lines.length; i++) {
     const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    
     if (currentline.length < 2) continue;
+
     const getValue = (idx: number) => idx >= 0 && idx < currentline.length ? currentline[idx].trim().replace(/^"|"$/g, '') : '';
+
     const amountStr = getValue(amountIdx);
     const amount = parseFloat(amountStr);
     
     if (!isNaN(amount)) {
        parsedData.push({
-           title: getValue(titleIdx) || 'Imported',
+           title: getValue(titleIdx) || 'Imported Transaction',
            amount: Math.abs(amount),
            date: getValue(dateIdx) ? new Date(getValue(dateIdx)).toISOString() : new Date().toISOString(),
            category: getValue(catIdx) || 'Other',

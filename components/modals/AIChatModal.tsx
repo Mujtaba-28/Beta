@@ -9,9 +9,10 @@ import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../../constants';
 
 interface AIChatModalProps {
     onClose: () => void;
+    totalBudget: number;
 }
 
-export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
+export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }) => {
     const { addTransaction, addGoal, updateBudget, addSubscription } = useFinance();
     const { currency } = useTheme();
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -107,9 +108,9 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
 
             const call = response.functionCalls?.[0];
 
-            if (call && call.args) {
+            if (call) {
                 let resultText = "Done.";
-                if (call.name === 'addTransaction') {
+                if (call.name === 'addTransaction' && call.args) {
                     const args = call.args as any;
                     await addTransaction({
                         id: Date.now(),
@@ -120,7 +121,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                         date: new Date().toISOString()
                     });
                     resultText = `✅ Added ${args.type}: ${currency}${args.amount} for ${args.category}.`;
-                } else if (call.name === 'addGoal') {
+                } else if (call.name === 'addGoal' && call.args) {
                     const args = call.args as any;
                     addGoal({
                         id: Date.now().toString(),
@@ -131,10 +132,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                         icon: 'shield'
                     });
                      resultText = `✅ Created goal "${args.name}" for ${currency}${args.targetAmount}.`;
-                } else if (call.name === 'updateBudget' && typeof call.args.amount === 'number') {
-                    updateBudget(call.args.amount, 'default');
+                } else if (call.name === 'updateBudget' && call.args) {
+                    updateBudget(call.args.amount as number, 'default');
                     resultText = `✅ Budget updated to ${currency}${call.args.amount}.`;
-                } else if (call.name === 'addSubscription') {
+                } else if (call.name === 'addSubscription' && call.args) {
                      const args = call.args as any;
                      addSubscription({
                          id: Date.now().toString(),
@@ -150,7 +151,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
                 setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: resultText, timestamp: new Date() }]);
                 
             } else if (response.text) {
-                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text || "I'm sorry, I couldn't process that.", timestamp: new Date() }]);
+                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text as string, timestamp: new Date() }]);
             }
 
         } catch (error) {
