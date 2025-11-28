@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, AlertTriangle, ThumbsUp, BarChart, Settings2, Eye, EyeOff, ArrowUp, ArrowDown, Loader2, HelpCircle, GripVertical, Check, EyeOff as EyeOffIcon } from 'lucide-react';
-import { CategoryData, DashboardCard } from '../../types';
+import { ChevronLeft, ChevronRight, AlertTriangle, ThumbsUp, BarChart, Settings2, Eye, ArrowUp, ArrowDown, Loader2, HelpCircle, Check, EyeOff as EyeOffIcon } from 'lucide-react';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../../constants';
 import { formatMoney } from '../../utils';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createAnalyticsWorker } from '../../utils/worker';
+import { DashboardCard } from '../../types';
 
 interface StatsViewProps {
   isPrivacyMode: boolean;
@@ -20,11 +21,9 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
     const [isEditingLayout, setIsEditingLayout] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Worker State
     const [stats, setStats] = useState<any>(null);
     const workerRef = useRef<Worker | null>(null);
 
-    // Default Layout State
     const [cardOrder, setCardOrder] = useState<DashboardCard[]>([
         { id: 'prediction', label: 'Forecast & Status', visible: true },
         { id: 'cashflow', label: '6-Month Cash Flow', visible: true },
@@ -63,7 +62,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
         }
     }, [transactions, currentDate, budgets, viewType]);
 
-    // Dashboard Customization Handlers
     const toggleCardVisibility = (id: string) => {
         setCardOrder(prev => prev.map(c => c.id === id ? { ...c, visible: !c.visible } : c));
     };
@@ -78,7 +76,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
         setCardOrder(newOrder);
     };
 
-    // --- RENDER ---
     const currentMonthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
     if (!stats && isLoading) {
@@ -104,7 +101,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
     const isCurrentMonth = new Date().getMonth() === currentDate.getMonth() && new Date().getFullYear() === currentDate.getFullYear();
     const daysPassed = Math.max(isCurrentMonth ? new Date().getDate() : daysInMonth, 1);
 
-    // Chart Configuration (Visuals)
     const SVG_HEIGHT = 220;
     const SVG_WIDTH = 350;
     const PADDING_TOP = 20;
@@ -144,7 +140,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
         chartTheme.point = '#10b981';
     }
 
-    const xLabels = [];
+    const xLabels: any[] = [];
     const labelInterval = Math.ceil(daysInMonth / 5); 
     for (let i = 0; i < daysInMonth; i += labelInterval) xLabels.push(i);
     if (xLabels[xLabels.length - 1] !== daysInMonth - 1) xLabels.push(daysInMonth - 1); 
@@ -213,9 +209,8 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                     <h3 className="font-bold text-emerald-950 dark:text-emerald-50 mb-4">Category Budgets</h3>
                     <div className="space-y-4">
                         {categoryData.filter((c: any) => c.budget > 0).map((cat: any) => {
-                             const percent = (cat.amount / cat.budget) * 100;
+                             const percent = cat.budget > 0 ? (cat.amount / cat.budget) * 100 : 0;
                              const isOver = percent > 100;
-                             // Re-attach icon
                              const originalCategory = EXPENSE_CATEGORIES.find(c => c.name === cat.name);
                              const Icon = originalCategory?.icon || HelpCircle;
                              
@@ -276,7 +271,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                                     </g>
                                 );
                             })}
-                            {xLabels.map((dayIndex) => {
+                            {xLabels.map((dayIndex: number) => {
                                 const x = getX(dayIndex);
                                 return (<line key={`grid-x-${dayIndex}`} x1={x} y1={zeroY} x2={x} y2={PADDING_TOP} stroke="#e2e8f0" strokeWidth="1" strokeDasharray="2 2" className="opacity-30 dark:opacity-10"/>);
                             })}
@@ -286,7 +281,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                             {isCurrentMonth && <line x1={lastActualPoint.x} y1={lastActualPoint.y} x2={predictedEndPoint.x} y2={predictedEndPoint.y} stroke={chartTheme.stroke} strokeWidth="2" strokeDasharray="4 4" className="opacity-60"/>}
                             {activeTotal > 0 && <circle cx={lastActualPoint.x} cy={lastActualPoint.y} r="3" fill={chartTheme.point} />}
                             {isCurrentMonth && <circle cx={predictedEndPoint.x} cy={predictedEndPoint.y} r="3" fill={chartTheme.point} className="opacity-60"/>}
-                            {xLabels.map((dayIndex) => {
+                            {xLabels.map((dayIndex: number) => {
                                 const xPos = getX(dayIndex);
                                 const dateObj = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayIndex + 1);
                                 const anchor = dayIndex === 0 ? 'start' : (dayIndex === daysInMonth - 1 ? 'end' : 'middle');
@@ -342,10 +337,9 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                     </div>
                     <div className="space-y-5">
                         {categoryData.length > 0 ? categoryData.map((cat: any) => {
-                            const percent = (cat.amount / maxCategoryVal) * 100;
+                            const percent = maxCategoryVal > 0 ? (cat.amount / maxCategoryVal) * 100 : 0;
                             const share = (totalForDonut > 0) ? (cat.amount / totalForDonut) * 100 : 0;
                             
-                            // Re-attach icon from source list
                             const originalCategory = (viewType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).find(c => c.name === cat.name);
                             const Icon = originalCategory?.icon || HelpCircle;
                             
@@ -389,37 +383,19 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                     {cardOrder.map((card, index) => (
                         <div key={card.id} className={`p-4 rounded-2xl border flex items-center gap-4 shadow-sm transition-all duration-300 ${card.visible ? 'bg-white dark:bg-[#0a3831] border-emerald-100 dark:border-emerald-800/30' : 'bg-slate-50 dark:bg-black/20 border-slate-100 dark:border-slate-800 opacity-60'}`}>
                             
-                            {/* Reorder Controls */}
                             <div className="flex flex-col gap-1 text-slate-400">
-                                <button 
-                                    onClick={() => moveCard(index, 'up')} 
-                                    disabled={index === 0} 
-                                    className="p-1 hover:text-emerald-500 disabled:opacity-20 disabled:hover:text-slate-400 transition-colors"
-                                >
-                                    <ArrowUp size={18}/>
-                                </button>
-                                <button 
-                                    onClick={() => moveCard(index, 'down')} 
-                                    disabled={index === cardOrder.length - 1} 
-                                    className="p-1 hover:text-emerald-500 disabled:opacity-20 disabled:hover:text-slate-400 transition-colors"
-                                >
-                                    <ArrowDown size={18}/>
-                                </button>
+                                <button onClick={() => moveCard(index, 'up')} disabled={index === 0} className="p-1 hover:text-emerald-500 disabled:opacity-20 disabled:hover:text-slate-400 transition-colors"><ArrowUp size={18}/></button>
+                                <button onClick={() => moveCard(index, 'down')} disabled={index === cardOrder.length - 1} className="p-1 hover:text-emerald-500 disabled:opacity-20 disabled:hover:text-slate-400 transition-colors"><ArrowDown size={18}/></button>
                             </div>
 
                             <div className="h-8 w-px bg-slate-100 dark:bg-slate-700"></div>
 
-                            {/* Label */}
                             <div className="flex-1">
                                 <span className="font-bold text-emerald-950 dark:text-emerald-50 block">{card.label}</span>
                                 <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{card.visible ? 'Visible' : 'Hidden'}</span>
                             </div>
 
-                            {/* Visibility Toggle */}
-                            <button 
-                                onClick={() => toggleCardVisibility(card.id)}
-                                className={`p-3 rounded-xl transition-colors ${card.visible ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}
-                            >
+                            <button onClick={() => toggleCardVisibility(card.id)} className={`p-3 rounded-xl transition-colors ${card.visible ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
                                 {card.visible ? <Eye size={20}/> : <EyeOffIcon size={20}/>}
                             </button>
                         </div>

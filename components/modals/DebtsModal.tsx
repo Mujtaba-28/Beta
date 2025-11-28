@@ -20,7 +20,6 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [newDebt, setNewDebt] = useState<Partial<Debt>>({ name: '', currentBalance: 0, interestRate: 0, minimumPayment: 0, category: 'Loan' });
     
-    // Planner State
     const [extraPayment, setExtraPayment] = useState(0);
     const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>('avalanche');
 
@@ -47,7 +46,6 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
         else addDebt(debtData);
         
         triggerHaptic(20);
-        // Reset
         setIsAdding(false);
         setEditingId(null);
         setNewDebt({ name: '', currentBalance: 0, interestRate: 0, minimumPayment: 0, category: 'Loan' });
@@ -61,9 +59,7 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
 
     const payoff = calculateDebtPayoff(debts, extraPayment, strategy);
     
-    // Calculate visual percentages for bars (max width based on baseline)
     const maxMonths = payoff.baselineMonths || 1;
-    const baselinePercent = 100;
     const newPercent = (payoff.months / maxMonths) * 100;
     
     const yearsSaved = ((payoff.baselineMonths - payoff.months) / 12).toFixed(1);
@@ -144,7 +140,6 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                     </div>
                 )}
 
-                {/* SIMPLIFIED PAYOFF SIMULATOR */}
                 <div className="bg-white dark:bg-[#0a3831] p-5 rounded-[2rem] mb-4 border border-emerald-100 dark:border-emerald-800/30 shrink-0 shadow-sm">
                     <div className="flex justify-between items-start mb-4">
                         <div>
@@ -155,7 +150,6 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                         </div>
                     </div>
                     
-                    {/* Big Extra Payment Input */}
                     <div className="bg-slate-50 dark:bg-black/20 p-4 rounded-2xl mb-6">
                         <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2 block">I can pay extra per month</label>
                         <div className="flex items-center gap-2">
@@ -170,9 +164,7 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Visual Timeline Comparison */}
                     <div className="space-y-4">
-                        {/* Current Path */}
                         <div>
                             <div className="flex justify-between text-xs font-bold mb-1">
                                 <span className="text-slate-400">Current Path</span>
@@ -183,14 +175,13 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                             </div>
                         </div>
 
-                        {/* New Path */}
                         <div>
                             <div className="flex justify-between text-xs font-bold mb-1">
                                 <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><CheckCircle2 size={12}/> With Extra Payment</span>
                                 <span className="text-emerald-600 dark:text-emerald-400">{(payoff.months/12).toFixed(1)} Years</span>
                             </div>
                             <div className="h-3 w-full bg-slate-100 dark:bg-black/40 rounded-full overflow-hidden relative">
-                                <div className="absolute inset-0 bg-emerald-100/50 w-full"></div> {/* Ghost bar */}
+                                <div className="absolute inset-0 bg-emerald-100/50 w-full"></div>
                                 <div className="h-full bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full transition-all duration-700 relative" style={{ width: `${newPercent}%` }}>
                                     <div className="absolute inset-0 bg-white/30 animate-[pulse_2s_infinite]"></div>
                                 </div>
@@ -198,7 +189,6 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Summary Result */}
                     {extraPayment > 0 && (
                         <div className="mt-6 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30 flex items-start gap-3">
                              <div className="p-1.5 bg-emerald-100 dark:bg-emerald-800/50 rounded-full text-emerald-600 dark:text-emerald-400 mt-0.5">
@@ -213,9 +203,8 @@ export const DebtsModal: React.FC<DebtsModalProps> = ({ onClose }) => {
                     )}
                 </div>
 
-                {/* List of Debts */}
                 <div className="space-y-3 overflow-y-auto flex-1 pr-1 scrollbar-hide pb-2">
-                    {debts.map(debt => (
+                    {debts.map((debt: Debt) => (
                         <div key={debt.id} className="bg-white dark:bg-[#0a3831] p-4 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 flex items-center justify-between group">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">

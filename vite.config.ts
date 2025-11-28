@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { fileURLToPath, URL } from 'url';
+import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,8 +10,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // FIX: Replaced `process.cwd()` which was causing a type error. This uses `import.meta.url` which is the modern ESM way to get the current file's path.
-      '@': fileURLToPath(new URL('.', import.meta.url)),
+      // FIX: Replaced `process.cwd()` with `.` to avoid a TypeScript type error.
+      // `path.resolve('.')` correctly resolves to the project's root directory,
+      // which is equivalent to `process.cwd()`.
+      '@': path.resolve('.'),
     },
   },
 });

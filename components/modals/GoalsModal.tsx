@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { X, Plus, Target, Trash2, Shield, Plane, Laptop, Home, Gift, Car, GraduationCap, Heart, Coins, ChevronRight, Edit2, Save } from 'lucide-react';
 import { Goal } from '../../types';
@@ -18,7 +19,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
     const [newGoal, setNewGoal] = useState<Partial<Goal>>({ name: '', targetAmount: 0, currentAmount: 0, color: 'bg-emerald-500', icon: 'shield' });
     const [deleteId, setDeleteId] = useState<string | null>(null);
     
-    // State to handle custom amount input per goal
     const [activeGoalInput, setActiveGoalInput] = useState<string | null>(null);
     const [customAmount, setCustomAmount] = useState('');
 
@@ -63,7 +63,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
         else addGoal(goalData);
         
         triggerHaptic(20);
-        // Reset
         setIsAdding(false);
         setEditingId(null);
         setNewGoal({ name: '', targetAmount: 0, currentAmount: 0, color: 'bg-emerald-500', icon: 'shield' });
@@ -120,7 +119,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                         </h4>
                         
                         <div className="space-y-5">
-                            {/* Name Input */}
                             <div className="space-y-1.5">
                                 <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Goal Name</label>
                                 <input 
@@ -133,7 +131,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                                 />
                             </div>
                             
-                            {/* Amount Inputs Row */}
                             <div className="flex gap-4">
                                 <div className="space-y-1.5 flex-1">
                                     <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Target Amount</label>
@@ -163,11 +160,9 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                                 </div>
                             </div>
                             
-                            {/* Customization Section */}
                             <div className="space-y-3 pt-2">
                                 <label className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest ml-1">Appearance</label>
                                 <div className="bg-slate-50 dark:bg-[#021c17] p-3 rounded-2xl border border-slate-100 dark:border-emerald-900/30">
-                                    {/* Icons */}
                                     <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-3 pb-1">
                                         {icons.map(ic => {
                                             const Icon = ic.icon;
@@ -183,7 +178,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                                             )
                                         })}
                                     </div>
-                                    {/* Colors */}
                                     <div className="flex gap-3 overflow-x-auto scrollbar-hide items-center h-8 px-1">
                                         {colors.map(c => (
                                             <button 
@@ -204,8 +198,8 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                 )}
 
                 <div className="space-y-4 overflow-y-auto flex-1 pr-1 scrollbar-hide pb-2">
-                    {goals.map(goal => {
-                        const progress = Math.min((goal.currentAmount / goal.targetAmount) * 100, 100);
+                    {goals.map((goal: Goal) => {
+                        const progress = goal.targetAmount > 0 ? Math.min((goal.currentAmount / goal.targetAmount) * 100, 100) : 0;
                         const IconData = icons.find(i => i.id === goal.icon) || icons[0];
                         const Icon = IconData.icon;
                         const isAddingCustom = activeGoalInput === goal.id;
@@ -268,7 +262,6 @@ export const GoalsModal: React.FC<GoalsModalProps> = ({ onClose }) => {
                                     </div>
                                 )}
 
-                                {/* Background decoration */}
                                 <div className={`absolute -right-6 -bottom-6 w-24 h-24 rounded-full ${goal.color} opacity-5 blur-2xl group-hover:opacity-10 transition-opacity`}></div>
                             </div>
                         )

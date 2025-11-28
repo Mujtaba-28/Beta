@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Sparkles, User, Bot, Loader2, AlertTriangle } from 'lucide-react';
 import { GoogleGenAI, FunctionDeclaration, Type } from "@google/genai";
@@ -8,10 +9,9 @@ import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../../constants';
 
 interface AIChatModalProps {
     onClose: () => void;
-    totalBudget: number;
 }
 
-export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }) => {
+export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
     const { addTransaction, addGoal, updateBudget, addSubscription } = useFinance();
     const { currency } = useTheme();
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -21,13 +21,11 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     
-    // Graceful Degradation: Check for API Key
     const hasApiKey = !!process.env.API_KEY;
 
     const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
     useEffect(() => { scrollToBottom(); }, [messages]);
 
-    // --- FUNCTION DECLARATIONS ---
     const addTransactionTool: FunctionDeclaration = {
         name: 'addTransaction',
         description: 'Add a new financial transaction (expense or income).',
@@ -98,7 +96,6 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
 
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             
-            // First call to check for tools
             const response = await ai.models.generateContent({
                 model: "gemini-2.5-flash",
                 config: { 
@@ -110,8 +107,7 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
 
             const call = response.functionCalls?.[0];
 
-            if (call) {
-                // EXECUTE TOOL
+            if (call && call.args) {
                 let resultText = "Done.";
                 if (call.name === 'addTransaction') {
                     const args = call.args as any;
@@ -135,8 +131,8 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
                         icon: 'shield'
                     });
                      resultText = `✅ Created goal "${args.name}" for ${currency}${args.targetAmount}.`;
-                } else if (call.name === 'updateBudget') {
-                    updateBudget(call.args.amount as number, 'default');
+                } else if (call.name === 'updateBudget' && typeof call.args.amount === 'number') {
+                    updateBudget(call.args.amount, 'default');
                     resultText = `✅ Budget updated to ${currency}${call.args.amount}.`;
                 } else if (call.name === 'addSubscription') {
                      const args = call.args as any;
@@ -151,12 +147,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
                      resultText = `✅ Added subscription: ${args.name}.`;
                 }
                 
-                // Add model response for the action
                 setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: resultText, timestamp: new Date() }]);
                 
             } else if (response.text) {
-                // TEXT RESPONSE
-                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text, timestamp: new Date() }]);
+                setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: response.text || "I'm sorry, I couldn't process that.", timestamp: new Date() }]);
             }
 
         } catch (error) {

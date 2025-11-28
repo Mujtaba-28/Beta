@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Edit2, Wallet, Target, ArrowDownLeft, ArrowUpRight, ArrowRight, ShieldAlert, DownloadCloud, X, Zap, Check } from 'lucide-react';
-import { Transaction } from '../../types';
+import { Subscription, Transaction } from '../../types';
 import { TransactionItem } from '../TransactionItem';
 import { formatMoney, triggerHaptic, calculateNextDate } from '../../utils';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -12,28 +12,24 @@ interface HomeViewProps {
   changeMonth: (offset: number) => void;
   onEditBudget: () => void;
   onEditTx: (tx: Transaction) => void;
-  onGoToStats: () => void;
   onViewHistory: () => void;
   isPrivacyMode: boolean;
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({ 
   currentDate, changeMonth, onEditBudget, onEditTx, 
-  onGoToStats, onViewHistory, isPrivacyMode 
+  onViewHistory, isPrivacyMode 
 }) => {
     const { transactions, createBackup, lastBackupDate, subscriptions, updateSubscription, addTransaction, activeContext, budgets } = useFinance();
     const { currency } = useTheme();
     const [filterType, setFilterType] = useState('all');
     const [showBackupAlert, setShowBackupAlert] = useState(false);
 
-    // Calculate Total Budget dynamically based on Context
     const currentMonthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
-    // Key format: 'personal-2025-11' or 'business-2025-11'
     const budgetKey = `${activeContext}-${currentMonthKey}`;
     const defaultBudgetKey = `${activeContext}-default`;
-    const totalBudget = budgets[budgetKey] || budgets[defaultBudgetKey] || 60000;
+    const totalBudget = budgets[budgetKey] || budgets[defaultBudgetKey] || 0;
 
-    // Backup Health Check
     useEffect(() => {
         if (transactions.length > 5) {
             if (!lastBackupDate) setShowBackupAlert(true);
@@ -44,16 +40,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
         }
     }, [transactions.length, lastBackupDate]);
     
-    // Check for Due Subscriptions
     const dueSubscription = useMemo(() => {
         const today = new Date();
         today.setHours(0,0,0,0);
-        const due = subscriptions.filter(sub => {
+        const due = subscriptions.filter((sub: Subscription) => {
             const nextDate = new Date(sub.nextBillingDate);
             nextDate.setHours(0,0,0,0);
             const diffDays = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
             return diffDays <= 1;
-        }).sort((a,b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
+        }).sort((a: Subscription, b: Subscription) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
         return due.length > 0 ? due[0] : null;
     }, [subscriptions]);
 
@@ -72,21 +67,20 @@ export const HomeView: React.FC<HomeViewProps> = ({
         triggerHaptic(20);
     };
 
-    // Derived Calculations
     const monthlyTransactions = useMemo(() => {
-        return transactions.filter(t => {
+        return transactions.filter((t: Transaction) => {
             const tDate = new Date(t.date);
             return tDate.getMonth() === currentDate.getMonth() && tDate.getFullYear() === currentDate.getFullYear();
         });
     }, [transactions, currentDate]);
 
-    const totalIncome = monthlyTransactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
-    const totalExpense = monthlyTransactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
+    const totalIncome = monthlyTransactions.filter((t: Transaction) => t.type === 'income').reduce((acc: number, curr: Transaction) => acc + curr.amount, 0);
+    const totalExpense = monthlyTransactions.filter((t: Transaction) => t.type === 'expense').reduce((acc: number, curr: Transaction) => acc + curr.amount, 0);
     const remainingBudget = totalBudget - totalExpense;
-    const budgetProgress = Math.min((totalExpense / totalBudget) * 100, 100);
+    const budgetProgress = totalBudget > 0 ? Math.min((totalExpense / totalBudget) * 100, 100) : 0;
 
-    const displayTransactions = (filterType === 'all' ? monthlyTransactions : monthlyTransactions.filter(t => t.type === filterType))
-      .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    const displayTransactions = (filterType === 'all' ? monthlyTransactions : monthlyTransactions.filter((t: Transaction) => t.type === filterType))
+      .sort((a: Transaction, b: Transaction) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
 
     const handleFilterClick = (type: string) => {
@@ -99,7 +93,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
     return (
         <div className="space-y-6 max-w-md mx-auto">
             
-            {/* SMART SUBSCRIPTION REMINDER */}
             {dueSubscription && (
                 <div className="p-4 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-200 dark:border-indigo-700/30 rounded-3xl animate-in slide-in-from-top-4 duration-500 shadow-sm relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4 opacity-5">
@@ -125,7 +118,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
             )}
 
-            {/* BACKUP HEALTH ALERT */}
             {showBackupAlert && (
                 <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/30 rounded-3xl animate-in slide-in-from-top-4 duration-500 shadow-sm">
                     <div className="flex gap-4">
@@ -147,7 +139,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
             )}
 
-            {/* MAIN DASHBOARD */}
             <div className="bg-white dark:bg-[#0a3831] p-6 rounded-[2.5rem] shadow-sm border border-emerald-100 dark:border-emerald-800/30 relative overflow-hidden">
                 <div className="flex justify-between items-center mb-6">
                     <div>
@@ -187,7 +178,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
             </div>
             
-            {/* MONTH NAVIGATOR */}
             <div className="flex items-center justify-between px-2">
                 <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-white dark:hover:bg-[#0a3831] text-slate-400 transition-colors"><ChevronLeft size={24}/></button>
                 <div className="flex items-center gap-2 text-emerald-900 dark:text-emerald-50 font-bold bg-white dark:bg-[#0a3831] px-4 py-2 rounded-2xl shadow-sm border border-emerald-100 dark:border-emerald-800/30">
@@ -197,7 +187,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-white dark:hover:bg-[#0a3831] text-slate-400 transition-colors"><ChevronRight size={24}/></button>
             </div>
 
-            {/* TRANSACTIONS LIST */}
             <div>
                 <div className="flex justify-between items-center mb-4 px-2">
                     <h3 className="font-bold text-emerald-950 dark:text-emerald-50 text-lg">Recent Activity</h3>
@@ -207,7 +196,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 </div>
                 <div className="space-y-3">
                     {displayTransactions.length > 0 ? (
-                        displayTransactions.map((tx) => (
+                        displayTransactions.map((tx: Transaction) => (
                             <TransactionItem 
                                 key={tx.id} 
                                 tx={tx} 
