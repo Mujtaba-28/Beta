@@ -69,7 +69,6 @@ export const compressImage = async (file: File): Promise<string> => {
                 
                 const ctx = canvas.getContext('2d');
                 ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // Return compressed JPEG base64
                 resolve(canvas.toDataURL('image/jpeg', 0.7)); 
             };
         };
@@ -81,7 +80,6 @@ export const fileToGenerativePart = async (file: File) => {
     const reader = new FileReader();
     reader.onloadend = () => {
         const result = reader.result as string;
-        // Remove data URL prefix (e.g., "data:image/jpeg;base64,")
         const base64Data = result.split(',')[1];
         resolve(base64Data);
     };
@@ -113,28 +111,17 @@ export const shareFile = async (file: File, title: string, text: string) => {
     return false;
 };
 
-// --- MULTI-CURRENCY UTILS ---
 const EXCHANGE_RATES: Record<string, number> = {
-    'INR': 1,
-    'USD': 84.5,
-    'EUR': 91.2,
-    'GBP': 107.8,
-    'AED': 23.0,
-    'JPY': 0.56,
+    'INR': 1, 'USD': 84.5, 'EUR': 91.2, 'GBP': 107.8, 'AED': 23.0, 'JPY': 0.56,
 };
 
 export const getExchangeRate = (from: string, to: string): number => {
     const fromRate = EXCHANGE_RATES[from] || 1;
     const toRate = EXCHANGE_RATES[to] || 1;
-    // (Amount in Base) = Amount / BaseRate
-    // Target Amount = (SourceAmount * SourceRate) / TargetRate
-    // e.g. 1 USD (84.5) to INR (1) -> 1 * 84.5 / 1 = 84.5
     return fromRate / toRate; 
 };
 
-// --- DEBT PAYOFF UTILS ---
 export const calculateDebtPayoff = (debts: Debt[], extraPayment: number, strategy: 'snowball' | 'avalanche') => {
-    // 1. Calculate Baseline (Min payments only)
     let baselineDebts = debts.map(d => ({ ...d }));
     let baselineMonths = 0;
     let baselineInterest = 0;
@@ -151,41 +138,30 @@ export const calculateDebtPayoff = (debts: Debt[], extraPayment: number, strateg
         });
     }
 
-    // 2. Calculate Accelerated (With Extra)
     let currentDebts = debts.map(d => ({ ...d }));
     let months = 0;
     let totalInterest = 0;
     
-    // Sort logic
     const sortDebts = (ds: typeof currentDebts) => {
-        if (strategy === 'snowball') {
-            // Lowest balance first
-            ds.sort((a, b) => a.currentBalance - b.currentBalance);
-        } else {
-            // Highest Interest Rate first
-            ds.sort((a, b) => b.interestRate - a.interestRate);
-        }
+        if (strategy === 'snowball') ds.sort((a, b) => a.currentBalance - b.currentBalance);
+        else ds.sort((a, b) => b.interestRate - a.interestRate);
     };
 
     while (currentDebts.some(d => d.currentBalance > 0.1) && months < 600) { 
         months++;
         let availableExtra = extraPayment;
-
         sortDebts(currentDebts);
 
-        // Apply minimums first
         currentDebts.forEach(debt => {
             if (debt.currentBalance > 0) {
                 const interest = (debt.currentBalance * (debt.interestRate / 100)) / 12;
                 totalInterest += interest;
                 debt.currentBalance += interest;
-                
                 const payment = Math.min(debt.currentBalance, debt.minimumPayment);
                 debt.currentBalance -= payment;
             }
         });
 
-        // Apply extra to top priority
         for (const debt of currentDebts) {
             if (debt.currentBalance > 0 && availableExtra > 0) {
                 const payment = Math.min(debt.currentBalance, availableExtra);
@@ -198,45 +174,33 @@ export const calculateDebtPayoff = (debts: Debt[], extraPayment: number, strateg
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + months);
 
-    return {
-        months,
-        payoffDate,
-        totalInterest,
-        baselineMonths,
-        baselineInterest
-    };
+    return { months, payoffDate, totalInterest, baselineMonths, baselineInterest };
 };
 
-// CSV EXPORT
 export const convertArrayToCSV = (arr: any[]) => {
   if (!arr || !arr.length) return '';
   const separator = ',';
   const keys = Object.keys(arr[0]).filter(k => k !== 'icon' && k !== 'splits' && k !== 'attachment'); 
   const csvContent =
-    keys.join(separator) +
-    '\n' +
-    arr.map((row) => {
-      return keys.map((k) => {
+    keys.join(separator) + '\n' +
+    arr.map((row) => keys.map((k) => {
         let cell = row[k] === null || row[k] === undefined ? '' : row[k];
         cell = cell instanceof Date ? cell.toISOString() : cell.toString();
         cell = cell.replace(/"/g, '""');
-        if (cell.search(/("|,|\n)/g) >= 0) {
-          cell = `"${cell}"`;
-        }
+        if (cell.search(/("|,|\n)/g) >= 0) cell = `"${cell}"`;
         return cell;
-      }).join(separator);
-    }).join('\n');
+      }).join(separator)
+    ).join('\n');
   return csvContent;
 };
 
-// CSV IMPORT
 export const parseCSV = (csvText: string): Partial<Transaction>[] => {
   const lines = csvText.split('\n').filter(l => l.trim());
   if (lines.length < 2) return []; 
 
   const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
   
-  const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('merchant') || h.includes('description'));
+  const titleIdx = headers.findIndex(h => h.includes('title') || h.includes('description'));
   const amountIdx = headers.findIndex(h => h.includes('amount'));
   const dateIdx = headers.findIndex(h => h.includes('date'));
   const catIdx = headers.findIndex(h => h.includes('category'));
@@ -246,17 +210,14 @@ export const parseCSV = (csvText: string): Partial<Transaction>[] => {
 
   for (let i = 1; i < lines.length; i++) {
     const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-    
     if (currentline.length < 2) continue;
-
     const getValue = (idx: number) => idx >= 0 && idx < currentline.length ? currentline[idx].trim().replace(/^"|"$/g, '') : '';
-
     const amountStr = getValue(amountIdx);
     const amount = parseFloat(amountStr);
     
     if (!isNaN(amount)) {
        parsedData.push({
-           title: getValue(titleIdx) || 'Imported Transaction',
+           title: getValue(titleIdx) || 'Imported',
            amount: Math.abs(amount),
            date: getValue(dateIdx) ? new Date(getValue(dateIdx)).toISOString() : new Date().toISOString(),
            category: getValue(catIdx) || 'Other',

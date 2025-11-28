@@ -25,7 +25,7 @@ import { useHashLocation } from './utils/router';
 import { triggerHaptic } from './utils';
 
 export default function App() {
-  const { transactions, addTransaction, updateTransaction, deleteTransaction, budgets, updateBudget, dataError, isOnboarded, userName, activeContext, setActiveContext } = useFinance();
+  const { transactions, addTransaction, updateTransaction, deleteTransaction, budgets, updateBudget, dataError, isOnboarded, userName, activeContext, setActiveContext } from useFinance();
   const { isDark, currency } = useTheme();
   
   const [activeTab, navigate] = useHashLocation();
@@ -61,7 +61,6 @@ export default function App() {
   }, []);
   
   useEffect(() => {
-    // If user is onboarded but has no active context (e.g., from an old version), show picker.
     if(isOnboarded && !activeContext) {
       setShowContextPicker(true);
     }

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Lock, Delete, Unlock, ScanFace, Fingerprint } from 'lucide-react';
+import { Lock, Delete, Unlock, ScanFace } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { authenticateBiometric, isBiometricAvailable } from '../../utils/security';
 
@@ -21,7 +21,6 @@ export const AppLock: React.FC<AppLockProps> = ({ savedPin, onUnlock }) => {
             const enabled = localStorage.getItem('emerald_biometric_active') === 'true';
             setCanUseBio(available && enabled);
             
-            // Auto-trigger bio on load if enabled
             if (available && enabled) {
                handleBiometricAuth();
             }
@@ -79,53 +78,29 @@ export const AppLock: React.FC<AppLockProps> = ({ savedPin, onUnlock }) => {
 
             <div className="flex gap-4 mb-12">
                 {[0, 1, 2, 3].map(i => (
-                    <div 
-                        key={i} 
-                        className={`w-4 h-4 rounded-full transition-all duration-300 ${i < input.length ? (error ? 'bg-rose-500' : 'bg-emerald-400') : 'bg-white/10'}`}
-                    ></div>
+                    <div key={i} className={`w-4 h-4 rounded-full transition-all duration-300 ${i < input.length ? (error ? 'bg-rose-500' : 'bg-emerald-400') : 'bg-white/10'}`} />
                 ))}
             </div>
 
             <div className="grid grid-cols-3 gap-6 w-full max-w-xs">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                    <button 
-                        key={num}
-                        onClick={() => handlePress(num.toString())}
-                        className="w-20 h-20 rounded-full bg-white/5 hover:bg-white/20 active:bg-emerald-500/50 transition-colors flex items-center justify-center text-2xl font-bold"
-                    >
-                        {num}
-                    </button>
+                    <button key={num} onClick={() => handlePress(num.toString())} className="w-20 h-20 rounded-full bg-white/5 hover:bg-white/20 active:bg-emerald-500/50 transition-colors flex items-center justify-center text-2xl font-bold" >{num}</button>
                 ))}
                 
                 <div className="w-20 h-20 flex items-center justify-center">
                      {canUseBio ? (
-                         <button onClick={handleBiometricAuth} className="w-16 h-16 rounded-full flex items-center justify-center text-emerald-400 hover:bg-white/10 transition-colors">
-                             <ScanFace size={32}/>
-                         </button>
+                         <button onClick={handleBiometricAuth} className="w-16 h-16 rounded-full flex items-center justify-center text-emerald-400 hover:bg-white/10 transition-colors"><ScanFace size={32}/></button>
                      ) : (
                          <button onClick={handleForgotPin} className="text-[10px] font-bold text-rose-400 opacity-60 hover:opacity-100 uppercase">Forgot?</button>
                      )}
                 </div>
 
-                <button 
-                    onClick={() => handlePress('0')}
-                    className="w-20 h-20 rounded-full bg-white/5 hover:bg-white/20 active:bg-emerald-500/50 transition-colors flex items-center justify-center text-2xl font-bold"
-                >
-                    0
-                </button>
-                <button 
-                    onClick={handleBackspace}
-                    className="w-20 h-20 rounded-full hover:bg-white/10 active:bg-rose-500/30 transition-colors flex items-center justify-center text-rose-400"
-                >
-                    <Delete size={28}/>
-                </button>
+                <button onClick={() => handlePress('0')} className="w-20 h-20 rounded-full bg-white/5 hover:bg-white/20 active:bg-emerald-500/50 transition-colors flex items-center justify-center text-2xl font-bold">0</button>
+                <button onClick={handleBackspace} className="w-20 h-20 rounded-full hover:bg-white/10 active:bg-rose-500/30 transition-colors flex items-center justify-center text-rose-400"><Delete size={28}/></button>
             </div>
             
-            {/* Fallback Forgot Button if Bio is shown above */}
             {canUseBio && (
-                <button onClick={handleForgotPin} className="mt-8 text-[10px] font-bold text-rose-400 opacity-40 hover:opacity-100 uppercase">
-                    Forgot PIN?
-                </button>
+                <button onClick={handleForgotPin} className="mt-8 text-[10px] font-bold text-rose-400 opacity-40 hover:opacity-100 uppercase">Forgot PIN?</button>
             )}
         </div>
     );

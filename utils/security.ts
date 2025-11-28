@@ -39,7 +39,6 @@ export const registerBiometric = async (userName: string) => {
     try {
         const credential = await navigator.credentials.create({ publicKey });
         if (credential) {
-            // In a real app, send credential to server. Here we assume success if OS prompts.
             localStorage.setItem('emerald_biometric_active', 'true');
             return true;
         }
