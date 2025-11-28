@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Sparkles, AlertOctagon, LayoutGrid } from 'lucide-react';
 import { Transaction, BudgetContext } from './types';
 import { HomeView } from './components/views/HomeView';
@@ -26,7 +26,7 @@ import { triggerHaptic } from './utils';
 
 export default function App() {
   const { 
-    transactions, addTransaction, updateTransaction, deleteTransaction, 
+    addTransaction, updateTransaction, deleteTransaction, 
     budgets, updateBudget, dataError, isOnboarded, userName, 
     activeContext, setActiveContext 
   } = useFinance();
@@ -206,7 +206,7 @@ export default function App() {
         {showSubsModal && <SubscriptionsModal onClose={() => setShowSubsModal(false)} />}
         {showGoalsModal && <GoalsModal onClose={() => setShowGoalsModal(false)} />}
         {showDebtsModal && <DebtsModal onClose={() => setShowDebtsModal(false)} />}
-        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} totalBudget={totalBudget} />}
+        {showAIChat && <AIChatModal onClose={() => setShowAIChat(false)} />}
         {showTutorialModal && <TutorialModal onClose={() => setShowTutorialModal(false)} />}
       </div>
     </div>

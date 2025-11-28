@@ -9,10 +9,9 @@ import { INCOME_CATEGORIES, EXPENSE_CATEGORIES } from '../../constants';
 
 interface AIChatModalProps {
     onClose: () => void;
-    totalBudget: number;
 }
 
-export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }) => {
+export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose }) => {
     const { addTransaction, addGoal, updateBudget, addSubscription } = useFinance();
     const { currency } = useTheme();
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -132,10 +131,10 @@ export const AIChatModal: React.FC<AIChatModalProps> = ({ onClose, totalBudget }
                         icon: 'shield'
                     });
                      resultText = `✅ Created goal "${args.name}" for ${currency}${args.targetAmount}.`;
-                } else if (call.name === 'updateBudget' && call.args) {
+                } else if (call.name === 'updateBudget' && call.args?.amount) {
                     updateBudget(call.args.amount as number, 'default');
                     resultText = `✅ Budget updated to ${currency}${call.args.amount}.`;
-                } else if (call.name === 'addSubscription' && call.args) {
+                } else if (call.name === 'addSubscription' && call.args?.name && call.args?.amount) {
                      const args = call.args as any;
                      addSubscription({
                          id: Date.now().toString(),

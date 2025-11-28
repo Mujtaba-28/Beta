@@ -1,7 +1,7 @@
+
 import React, { useState, useRef } from 'react';
-import { X, Trash2, Calendar as CalendarIcon, Edit2, Save, Sparkles, Loader2, Camera, Split, Plus, Minus, Check, Image as ImageIcon, Paperclip } from 'lucide-react';
+import { X, Trash2, Calendar as CalendarIcon, Edit2, Save, Sparkles, Loader2, Camera, Split, Plus, Minus, Image as ImageIcon, Paperclip } from 'lucide-react';
 import { Transaction } from '../../types';
-import { useFinance } from '../../contexts/FinanceContext';
 import { useTransactionForm } from '../../hooks/useTransactionForm';
 import { CurrencyInput } from '../forms/CurrencyInput';
 import { ConfirmationModal } from './ConfirmationModal';
@@ -21,7 +21,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
         category, setCategory, selectedCurrency, setSelectedCurrency,
         originalAmount, setOriginalAmount, isSplitMode, setIsSplitMode,
         splits, setSplits, attachment, setAttachment, isAnalyzing,
-        currentCategoryList, currencyCodes,
+        currentCategoryList,
         handleAttachment, analyzeReceipt, handleAiTextParse, handleSubmit
     } = useTransactionForm(initialData, currency, onSave);
 
@@ -29,13 +29,11 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
     const [textInput, setTextInput] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     
-    // Graceful Degradation: Check for API Key
     const hasApiKey = !!process.env.API_KEY;
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const attachmentInputRef = useRef<HTMLInputElement>(null);
     
-    // Helpers for Split UI
     const totalSplitAmount = splits.reduce((acc, s) => acc + (s.amount || 0), 0);
     const splitRemaining = parseFloat(amount || '0') - totalSplitAmount;
     const isSplitValid = Math.abs(splitRemaining) < 1;
@@ -122,7 +120,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
                         amount={amount} setAmount={setAmount}
                         originalAmount={originalAmount} setOriginalAmount={setOriginalAmount}
                         selectedCurrency={selectedCurrency} setSelectedCurrency={setSelectedCurrency}
-                        baseCurrency={currency} currencyCodes={currencyCodes}
+                        baseCurrency={currency}
                     />
 
                     <div className="bg-emerald-100 dark:bg-emerald-900/40 p-1.5 rounded-2xl flex">
@@ -144,7 +142,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
                     {!isSplitMode ? (
                         <div>
                             <label className="text-xs font-bold text-emerald-900/50 dark:text-emerald-100/50 ml-2 mb-2 block tracking-wider">CATEGORY</label>
-                            {/* Adjusted margins and padding to prevent clipping of shadows on the active item */}
                             <div className="flex gap-4 overflow-x-auto py-6 px-6 scrollbar-hide -mx-6">
                                 {currentCategoryList.map(cat => (
                                     <button type="button" key={cat.id} onClick={() => setCategory(cat)} className={`flex flex-col items-center gap-2 min-w-[72px] rounded-2xl transition-all duration-300 ${category.id === cat.id ? 'scale-110' : 'opacity-60 hover:opacity-100'}`}>
@@ -152,7 +149,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ onClose, onS
                                         <span className={`text-[10px] font-bold ${category.id === cat.id ? 'text-emerald-700 dark:text-emerald-300' : 'text-emerald-900/40 dark:text-emerald-100/40'}`}>{cat.name}</span>
                                     </button>
                                 ))}
-                                {/* Spacer to ensure last item isn't flush against edge */}
                                 <div className="w-2 shrink-0"></div>
                             </div>
                         </div>

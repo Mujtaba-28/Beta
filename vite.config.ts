@@ -10,10 +10,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // FIX: Replaced `process.cwd()` with `__dirname` to avoid TypeScript type errors
-      // in environments where Node.js `process` types are not fully available.
-      // `path.resolve(__dirname, '.')` correctly resolves to the project's root directory.
-      '@': path.resolve(__dirname, '.'),
+      // FIX: Replaced `__dirname` with `process.cwd()` to fix "Cannot find name '__dirname'" error.
+      // This error occurs because __dirname is not available in ES modules by default.
+      // process.cwd() provides the current working directory, which is the project root in this context.
+      '@': path.resolve(process.cwd(), '.'),
     },
   },
 });

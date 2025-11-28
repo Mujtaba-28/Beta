@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Moon, Sun, Lock, Unlock, HelpCircle, ScanFace, Check } from 'lucide-react';
+import { X, Moon, Sun, Lock, Unlock, HelpCircle, ScanFace } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useFinance } from '../../contexts/FinanceContext';
 import { registerBiometric, isBiometricAvailable } from '../../utils/security';
@@ -14,7 +14,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
     const { isDark, toggleTheme, currency, setCurrency } = useTheme();
     const { userName } = useFinance();
     
-    // Lock State
     const [hasPin, setHasPin] = useState(false);
     const [bioActive, setBioActive] = useState(false);
     const [bioAvailable, setBioAvailable] = useState(false);
@@ -124,7 +123,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
                 </div>
                 <div className="space-y-6">
                     
-                    {/* Tutorial Button */}
                     <button 
                         onClick={onOpenTutorial}
                         className="w-full p-4 bg-white dark:bg-[#0a3831] rounded-2xl border border-emerald-50 dark:border-emerald-800/30 flex items-center justify-between group active:scale-95 transition-transform"
@@ -137,7 +135,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
                         </div>
                     </button>
 
-                    {/* Dark Mode */}
                     <div className="flex items-center justify-between p-4 bg-white dark:bg-[#0a3831] rounded-2xl border border-emerald-50 dark:border-emerald-800/30">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-xl">
@@ -150,11 +147,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
                         </button>
                     </div>
 
-                    {/* Security */}
                     <div className="bg-white dark:bg-[#0a3831] rounded-2xl border border-emerald-50 dark:border-emerald-800/30 overflow-hidden">
                         {mode === 'view' && (
                             <div className="p-4 space-y-4">
-                                {/* PIN Section */}
                                 <div>
                                     <div className="flex items-center gap-3 mb-4">
                                         <div className={`p-2 rounded-xl ${hasPin ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
@@ -175,7 +170,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
                                     )}
                                 </div>
 
-                                {/* Biometric Section */}
                                 {hasPin && bioAvailable && (
                                     <div className="pt-4 border-t border-slate-100 dark:border-emerald-900/30">
                                         <div className="flex items-center justify-between">
@@ -205,7 +199,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, onOpenTut
                         {mode === 'remove' && renderPinPad('Enter PIN to Remove', 'Remove Lock')}
                     </div>
 
-                    {/* Currency */}
                     <div>
                         <h4 className="font-bold text-sm text-emerald-900 dark:text-emerald-100 mb-3 ml-2">Currency</h4>
                         <div className="grid grid-cols-4 gap-2">

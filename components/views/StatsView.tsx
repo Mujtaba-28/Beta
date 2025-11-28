@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, AlertTriangle, ThumbsUp, BarChart, Settings2, Eye, EyeOff, ArrowUp, ArrowDown, Loader2, HelpCircle, GripVertical, Check, EyeOff as EyeOffIcon } from 'lucide-react';
-import { CategoryData, DashboardCard } from '../../types';
+import { ChevronLeft, ChevronRight, AlertTriangle, ThumbsUp, BarChart, Settings2, Eye, ArrowUp, ArrowDown, Loader2, HelpCircle, Check, EyeOff as EyeOffIcon } from 'lucide-react';
+import { DashboardCard } from '../../types';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../../constants';
 import { formatMoney } from '../../utils';
 import { useFinance } from '../../contexts/FinanceContext';
@@ -14,18 +15,15 @@ interface StatsViewProps {
 }
 
 export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate, changeMonth }) => {
-    // FIX: Get activeContext to pass to the analytics worker for correct budget calculations.
     const { transactions, budgets, activeContext } = useFinance();
     const { currency } = useTheme();
     const [viewType, setViewType] = useState<'expense' | 'income'>('expense');
     const [isEditingLayout, setIsEditingLayout] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Worker State
     const [stats, setStats] = useState<any>(null);
     const workerRef = useRef<Worker | null>(null);
 
-    // Default Layout State
     const [cardOrder, setCardOrder] = useState<DashboardCard[]>([
         { id: 'prediction', label: 'Forecast & Status', visible: true },
         { id: 'cashflow', label: '6-Month Cash Flow', visible: true },
@@ -58,16 +56,13 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                 currentDateStr: currentDate.toISOString(),
                 budgets,
                 viewType,
-                // FIX: Pass activeContext to worker.
                 activeContext,
                 EXPENSE_CATEGORIES: sanitizeCats(EXPENSE_CATEGORIES),
                 INCOME_CATEGORIES: sanitizeCats(INCOME_CATEGORIES)
             });
         }
-    // FIX: Add activeContext to dependency array.
     }, [transactions, currentDate, budgets, viewType, activeContext]);
 
-    // Dashboard Customization Handlers
     const toggleCardVisibility = (id: string) => {
         setCardOrder(prev => prev.map(c => c.id === id ? { ...c, visible: !c.visible } : c));
     };
@@ -82,7 +77,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
         setCardOrder(newOrder);
     };
 
-    // --- RENDER ---
     const currentMonthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
     if (!stats && isLoading) {
@@ -108,7 +102,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
     const isCurrentMonth = new Date().getMonth() === currentDate.getMonth() && new Date().getFullYear() === currentDate.getFullYear();
     const daysPassed = Math.max(isCurrentMonth ? new Date().getDate() : daysInMonth, 1);
 
-    // Chart Configuration (Visuals)
     const SVG_HEIGHT = 220;
     const SVG_WIDTH = 350;
     const PADDING_TOP = 20;
@@ -148,7 +141,7 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
         chartTheme.point = '#10b981';
     }
 
-    const xLabels = [];
+    const xLabels: any[] = [];
     const labelInterval = Math.ceil(daysInMonth / 5); 
     for (let i = 0; i < daysInMonth; i += labelInterval) xLabels.push(i);
     if (xLabels[xLabels.length - 1] !== daysInMonth - 1) xLabels.push(daysInMonth - 1); 
@@ -219,7 +212,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                         {categoryData.filter((c: any) => c.budget > 0).map((cat: any) => {
                              const percent = (cat.amount / cat.budget) * 100;
                              const isOver = percent > 100;
-                             // Re-attach icon
                              const originalCategory = EXPENSE_CATEGORIES.find(c => c.name === cat.name);
                              const Icon = originalCategory?.icon || HelpCircle;
                              
@@ -349,7 +341,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                             const percent = (cat.amount / maxCategoryVal) * 100;
                             const share = (totalForDonut > 0) ? (cat.amount / totalForDonut) * 100 : 0;
                             
-                            // Re-attach icon from source list
                             const originalCategory = (viewType === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES).find(c => c.name === cat.name);
                             const Icon = originalCategory?.icon || HelpCircle;
                             
@@ -393,7 +384,6 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
                     {cardOrder.map((card, index) => (
                         <div key={card.id} className={`p-4 rounded-2xl border flex items-center gap-4 shadow-sm transition-all duration-300 ${card.visible ? 'bg-white dark:bg-[#0a3831] border-emerald-100 dark:border-emerald-800/30' : 'bg-slate-50 dark:bg-black/20 border-slate-100 dark:border-slate-800 opacity-60'}`}>
                             
-                            {/* Reorder Controls */}
                             <div className="flex flex-col gap-1 text-slate-400">
                                 <button 
                                     onClick={() => moveCard(index, 'up')} 
@@ -413,13 +403,11 @@ export const StatsView: React.FC<StatsViewProps> = ({ isPrivacyMode, currentDate
 
                             <div className="h-8 w-px bg-slate-100 dark:bg-slate-700"></div>
 
-                            {/* Label */}
                             <div className="flex-1">
                                 <span className="font-bold text-emerald-950 dark:text-emerald-50 block">{card.label}</span>
                                 <span className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">{card.visible ? 'Visible' : 'Hidden'}</span>
                             </div>
 
-                            {/* Visibility Toggle */}
                             <button 
                                 onClick={() => toggleCardVisibility(card.id)}
                                 className={`p-3 rounded-xl transition-colors ${card.visible ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400' : 'bg-slate-200 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}

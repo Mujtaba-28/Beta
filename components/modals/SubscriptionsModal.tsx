@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Plus, Calendar, Trash2, Zap, LayoutGrid, List, Edit2, PlayCircle, Repeat, Tag } from 'lucide-react';
+import { X, Plus, Calendar, Trash2, Zap, LayoutGrid, List, Edit2, Repeat } from 'lucide-react';
 import { Subscription } from '../../types';
 import { EXPENSE_CATEGORIES } from '../../constants';
 import { formatMoney, triggerHaptic } from '../../utils';
@@ -50,7 +50,6 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
         else addSubscription(subData);
         
         triggerHaptic(20);
-        // Reset
         setIsAdding(false);
         setEditingId(null);
         setNewSub({ name: '', amount: 0, category: 'Bills', billingCycle: 'monthly', nextBillingDate: new Date().toISOString().split('T')[0], autoPay: false });
@@ -65,7 +64,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
     const calculateMonthlyCost = (amount: number, cycle: string) => {
         switch(cycle) {
             case 'daily': return amount * 30;
-            case 'weekly': return amount * 4.33; // Average weeks in a month
+            case 'weekly': return amount * 4.33;
             case 'monthly': return amount;
             case 'quarterly': return amount / 3;
             case 'half-yearly': return amount / 6;
@@ -74,7 +73,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
         }
     };
 
-    const totalMonthly = subscriptions.reduce((acc, sub) => acc + calculateMonthlyCost(sub.amount, sub.billingCycle), 0);
+    const totalMonthly = subscriptions.reduce((acc: number, sub: Subscription) => acc + calculateMonthlyCost(sub.amount, sub.billingCycle), 0);
 
     const cycleOptions = [
         { value: 'daily', label: 'Daily', icon: Repeat },
@@ -91,13 +90,12 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
         icon: c.icon
     }));
 
-    // Calendar Generation
     const generateCalendarDays = () => {
         const today = new Date();
         const year = today.getFullYear();
         const month = today.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDay = new Date(year, month, 1).getDay(); // 0 = Sunday
+        const firstDay = new Date(year, month, 1).getDay();
 
         const days = [];
         for (let i = 0; i < firstDay; i++) days.push(null);
@@ -170,7 +168,6 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
                                 </div>
                             </div>
                             
-                            {/* Auto Pay Toggle */}
                             <div 
                                 onClick={() => setNewSub({...newSub, autoPay: !newSub.autoPay})}
                                 className={`p-3 rounded-xl flex items-center justify-between cursor-pointer border transition-all ${newSub.autoPay ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800' : 'bg-slate-50 border-transparent dark:bg-black/20'}`}
@@ -207,7 +204,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
 
                 {viewMode === 'list' ? (
                     <div className="space-y-3 overflow-y-auto flex-1 pr-1 scrollbar-hide">
-                        {subscriptions.map(sub => {
+                        {subscriptions.map((sub: Subscription) => {
                             const daysLeft = Math.ceil((new Date(sub.nextBillingDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
                             const isDueSoon = daysLeft >= 0 && daysLeft <= 5;
                             
@@ -248,8 +245,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
                             {calendarDays.map((day, i) => {
                                 if (!day) return <div key={i} className="aspect-square"></div>;
                                 
-                                // Find bills on this day
-                                const billsOnDay = subscriptions.filter(s => new Date(s.nextBillingDate).getDate() === day);
+                                const billsOnDay = subscriptions.filter((s: Subscription) => new Date(s.nextBillingDate).getDate() === day);
                                 const hasBill = billsOnDay.length > 0;
                                 const isToday = day === new Date().getDate();
 
@@ -258,7 +254,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
                                         <span className={`text-xs font-bold ${isToday ? 'text-emerald-600' : 'text-slate-600 dark:text-slate-400'}`}>{day}</span>
                                         {hasBill && (
                                             <div className="flex -space-x-1 mt-1">
-                                                {billsOnDay.map((bill, idx) => (
+                                                {billsOnDay.map((bill: Subscription) => (
                                                     <div key={bill.id} className={`w-1.5 h-1.5 rounded-full ring-1 ring-white ${bill.autoPay ? 'bg-indigo-500' : 'bg-rose-500'}`} title={`${bill.name}`}></div>
                                                 ))}
                                             </div>
@@ -269,7 +265,7 @@ export const SubscriptionsModal: React.FC<SubscriptionsModalProps> = ({ onClose 
                         </div>
                         <div className="mt-4 space-y-2">
                              <h5 className="text-xs font-bold text-emerald-900 dark:text-emerald-100 uppercase tracking-wider">Upcoming this month</h5>
-                             {subscriptions.sort((a,b) => new Date(a.nextBillingDate).getDate() - new Date(b.nextBillingDate).getDate()).map(sub => (
+                             {subscriptions.sort((a: Subscription, b: Subscription) => new Date(a.nextBillingDate).getDate() - new Date(b.nextBillingDate).getDate()).map((sub: Subscription) => (
                                  <div key={sub.id} className="flex justify-between text-xs font-medium text-slate-500">
                                      <span className="flex items-center gap-1">
                                          {new Date(sub.nextBillingDate).getDate()}th - {sub.name}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { RefreshCcw, ChevronDown, Check, X } from 'lucide-react';
 
@@ -9,12 +10,11 @@ interface CurrencyInputProps {
     selectedCurrency: string;
     setSelectedCurrency: (v: string) => void;
     baseCurrency: string;
-    currencyCodes: Record<string, string>;
 }
 
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     amount, setAmount, originalAmount, setOriginalAmount,
-    selectedCurrency, setSelectedCurrency, baseCurrency, currencyCodes
+    selectedCurrency, setSelectedCurrency, baseCurrency
 }) => {
     const [isSelectionMode, setIsSelectionMode] = useState(false);
 

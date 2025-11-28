@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Lock, Delete, Unlock, ScanFace, Fingerprint } from 'lucide-react';
+import { Lock, Delete, Unlock, ScanFace } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { authenticateBiometric, isBiometricAvailable } from '../../utils/security';
 
@@ -21,7 +21,6 @@ export const AppLock: React.FC<AppLockProps> = ({ savedPin, onUnlock }) => {
             const enabled = localStorage.getItem('emerald_biometric_active') === 'true';
             setCanUseBio(available && enabled);
             
-            // Auto-trigger bio on load if enabled
             if (available && enabled) {
                handleBiometricAuth();
             }
@@ -121,7 +120,6 @@ export const AppLock: React.FC<AppLockProps> = ({ savedPin, onUnlock }) => {
                 </button>
             </div>
             
-            {/* Fallback Forgot Button if Bio is shown above */}
             {canUseBio && (
                 <button onClick={handleForgotPin} className="mt-8 text-[10px] font-bold text-rose-400 opacity-40 hover:opacity-100 uppercase">
                     Forgot PIN?

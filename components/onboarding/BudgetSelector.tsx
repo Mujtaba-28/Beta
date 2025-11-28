@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { User, Briefcase, ChevronRight, Wallet, Building2, Plus, X, Folder, Check, Trash2, Calendar, Edit2, Home, Car, Gift, Zap, ShoppingBag, Plane, Coffee, CreditCard, Heart, Laptop, Smartphone, Smile } from 'lucide-react';
+import { User, Briefcase, ChevronRight, Plus, X, Folder, Check, Trash2, Calendar, Edit2, Home, Car, Gift, Zap, ShoppingBag, Plane, Coffee, CreditCard, Heart, Laptop, Smartphone, Smile } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { BudgetContext, ContextMetadata } from '../../types';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -19,14 +19,12 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onSelect, userNa
   const [isEditingList, setIsEditingList] = useState(false);
   const [formState, setFormState] = useState<{ mode: 'create' | 'edit'; context?: ContextMetadata } | null>(null);
   
-  // Form fields state
   const [name, setName] = useState('');
   const [initialBudget, setInitialBudget] = useState('');
   const [description, setDescription] = useState('');
   const [timeline, setTimeline] = useState('monthly');
   const [selectedIcon, setSelectedIcon] = useState('Folder');
 
-  // Delete State
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const availableIcons = [
@@ -105,11 +103,9 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onSelect, userNa
   ];
 
   const getContextStyle = (ctx: ContextMetadata) => {
-      // Find the icon in our map, default to Folder if string logic fails
       const IconObj = availableIcons.find(i => i.name === ctx.icon) || { icon: Folder };
       const Icon = IconObj.icon;
       
-      // Determine color based on type or icon for variety
       let color = 'blue';
       if (ctx.type === 'personal') color = 'indigo';
       else if (ctx.type === 'business') color = 'teal';
@@ -245,7 +241,6 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onSelect, userNa
          </div>
       )}
 
-      {/* Header */}
       <div className="pt-12 px-6 pb-4 shrink-0 text-center relative">
             <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border-2 border-white dark:border-emerald-800/50">
                 <img src={`https://api.dicebear.com/9.x/avataaars/svg?seed=${userName}`} alt="Avatar" className="w-14 h-14 rounded-full" />
@@ -264,7 +259,6 @@ export const BudgetSelector: React.FC<BudgetSelectorProps> = ({ onSelect, userNa
             )}
       </div>
 
-      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto px-6 pb-24 scrollbar-hide">
         <div className="w-full max-w-sm mx-auto space-y-4 py-4">
             

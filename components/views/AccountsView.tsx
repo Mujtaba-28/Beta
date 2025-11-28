@@ -1,5 +1,6 @@
+
 import React, { useRef, useState } from 'react';
-import { Upload, Download, Settings, ChevronRight, Save, FolderOpen, FileText, Edit2, RefreshCw, Trash2, Check, Palette, Cloud } from 'lucide-react';
+import { Upload, Download, Settings, ChevronRight, Save, FolderOpen, FileText, Edit2, RefreshCw, Trash2, Check, Cloud } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { parseCSV, triggerHaptic, formatDate } from '../../utils';
@@ -17,12 +18,10 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onOpenSettings }) =>
     const fileInputRef = useRef<HTMLInputElement>(null);
     const backupInputRef = useRef<HTMLInputElement>(null);
 
-    // Edit Profile State
     const [isEditing, setIsEditing] = useState(false);
     const [tempName, setTempName] = useState(userName);
     const [avatarSeed, setAvatarSeed] = useState(userName);
     
-    // Confirmation State
     const [showResetConfirm, setShowResetConfirm] = useState(false);
 
     const handleSaveProfile = () => {
@@ -117,7 +116,6 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onOpenSettings }) =>
 
             <h2 className="text-2xl font-bold text-emerald-950 dark:text-emerald-50 px-2">Settings</h2>
             
-            {/* Identity Card */}
             <div className="bg-white dark:bg-[#0a3831] p-6 rounded-[2.5rem] shadow-sm border border-emerald-100 dark:border-emerald-800/30 relative overflow-hidden group mx-2">
                 <div className="flex items-center gap-4 relative z-10">
                     <div className="relative">
@@ -168,7 +166,6 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onOpenSettings }) =>
                 </div>
             </div>
 
-            {/* App Preferences */}
             <div className="space-y-2 px-2">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">App Preferences</h3>
                 <div className="rounded-2xl overflow-hidden border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
@@ -176,7 +173,6 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onOpenSettings }) =>
                 </div>
             </div>
 
-            {/* Data Management */}
             <div className="space-y-2 px-2">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest px-2">Data Management</h3>
                 <div className="rounded-2xl overflow-hidden border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
@@ -230,7 +226,6 @@ export const AccountsView: React.FC<AccountsViewProps> = ({ onOpenSettings }) =>
                 </div>
             </div>
 
-            {/* Danger Zone */}
             <div className="space-y-2 px-2">
                 <h3 className="text-xs font-bold text-rose-400 uppercase tracking-widest px-2">Danger Zone</h3>
                 <div className="rounded-2xl overflow-hidden border border-rose-100 dark:border-rose-900/30 shadow-sm">

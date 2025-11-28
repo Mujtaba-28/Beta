@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Save, PieChart, Wallet } from 'lucide-react';
 import { EXPENSE_CATEGORIES } from '../../constants';
 import { useFinance } from '../../contexts/FinanceContext';
-import { formatMoney, triggerHaptic } from '../../utils';
+import { triggerHaptic } from '../../utils';
 
 interface BudgetModalProps {
   currentBudget: number;
@@ -18,13 +19,11 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({ currentBudget, onSave,
     const [amount, setAmount] = useState(currentBudget);
     const [activeTab, setActiveTab] = useState<'total' | 'category'>('total');
     
-    // Local state to hold category limit edits before saving
     const [categoryLimits, setCategoryLimits] = useState<Record<string, string>>({});
 
     const currentMonthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
     const monthKey = currentDate.getFullYear() + '-' + String(currentDate.getMonth() + 1).padStart(2, '0');
     
-    // Initialize local state from context on mount or month change
     useEffect(() => {
         const initialLimits: Record<string, string> = {};
         EXPENSE_CATEGORIES.forEach(cat => {
@@ -42,15 +41,13 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({ currentBudget, onSave,
     const saveAllCategories = () => {
         Object.entries(categoryLimits).forEach(([catName, val]) => {
             const numVal = parseFloat(String(val));
-            // Only save if valid number or if explicitly clearing (0)
             if (!isNaN(numVal)) {
                 onSave(numVal, monthKey, catName);
             } else if (val === '') {
-                onSave(0, monthKey, catName); // Treat empty as 0/delete
+                onSave(0, monthKey, catName);
             }
         });
         triggerHaptic(20);
-        // Optional: Close modal or show success toast. Keeping it open allows further edits.
     };
 
     return (
@@ -61,14 +58,12 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({ currentBudget, onSave,
                     <button onClick={onClose} aria-label="Close Budget Modal" className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><X size={24} className="opacity-60 text-emerald-900 dark:text-emerald-100"/></button>
                 </div>
 
-                {/* Month Navigator */}
                 <div className="flex items-center justify-between mb-6 bg-white dark:bg-[#0a3831] p-2 rounded-2xl border border-emerald-100 dark:border-emerald-800/30">
                     <button onClick={() => changeBudgetMonth(-1)} aria-label="Previous Month" className="p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-emerald-900 dark:text-emerald-100"><ChevronLeft size={20}/></button>
                     <span className="text-sm font-bold text-emerald-900 dark:text-emerald-100 uppercase tracking-widest">{currentMonthName}</span>
                     <button onClick={() => changeBudgetMonth(1)} aria-label="Next Month" className="p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 text-emerald-900 dark:text-emerald-100"><ChevronRight size={20}/></button>
                 </div>
 
-                {/* Tabs */}
                 <div className="flex bg-slate-100 dark:bg-black/20 p-1 rounded-2xl mb-6">
                     <button 
                         onClick={() => setActiveTab('total')}
